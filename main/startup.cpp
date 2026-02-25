@@ -1,11 +1,8 @@
-#ifdef __cplusplus
-extern "C" // Using extern "C" here tells the C++ compiler to use C naming/calling conventions (i.e. no name mangling) for functions in this library/header
-{
-#include "lvgl.h"
-}
-#endif
+#include "DS3231.hpp"
+#include "freertos/FreeRTOS.h"
 
-void main(void)
+// Need to extern "C" here so that the esp-idf build tool can find our main
+extern "C" void app_main(void)
 {
-    lv_init();
+
 }
