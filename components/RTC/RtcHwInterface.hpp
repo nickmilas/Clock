@@ -7,35 +7,30 @@
 
 #include "status.hpp"
 
-class IRtcHw
+class RtcHwInterface
 {
 public:
     /**
      * @brief Structure used to keep track of time/calender data
      */
-    struct time_t{
+    typedef struct {
         uint8_t sec;
         uint8_t min;
         uint8_t hour;
         uint8_t day;
         uint8_t month;
         uint8_t year;
-    };
+    } time_t;
 
     /**
      * @brief Default constructor.
      */
-    IRtcHw() = default;
+    RtcHwInterface() = default;
 
     /**
      * @brief Default destructor.
      */
-    virtual ~IRtcHw() = default;
-
-    /**
-     * @brief Initialize the rtc module by adding it as a device on the I2C bus
-     */
-    virtual void rtcHwInit(void) = 0;
+    virtual ~RtcHwInterface() = default;
 
     /**
      * @brief Read the time off of an RTC device
@@ -51,11 +46,11 @@ public:
      * @param tm - The time to set on the RTC
      * @return Status_t - Whether or not the write was successful
      */
-    virtual Status_t setTime(time_t tm) = 0;
+    virtual Status_t setTime(const time_t& tm) = 0;
 
 private:
-    IRtcHw(const IRtcHw&) = delete;                 //! Delete copy-assignment constructors explicitly
-    IRtcHw& operator=(const IRtcHw&) = delete;      //! Delete copy constructors explicitly
-    IRtcHw(const IRtcHw&&) = delete;                //! Delete move-assignment constructors explicitly
-    IRtcHw&& operator=(const IRtcHw&&) = delete;    //! Delete move  constructors explicitly
+    RtcHwInterface(const RtcHwInterface&) = delete;                 //! Delete copy-assignment constructors explicitly
+    RtcHwInterface& operator=(const RtcHwInterface&) = delete;      //! Delete copy constructors explicitly
+    RtcHwInterface(const RtcHwInterface&&) = delete;                //! Delete move-assignment constructors explicitly
+    RtcHwInterface&& operator=(const RtcHwInterface&&) = delete;    //! Delete move  constructors explicitly
 };

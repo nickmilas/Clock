@@ -22,6 +22,13 @@ public:
     virtual ~I2CBusInterface() = default;
 
     /**
+     * @brief Wrapper to add a new device to a given I2C bus instance
+     * 
+     * @param config - Configuration info for the device to be added to the bus
+     */
+    virtual Status_t addDevice(const i2c_device_config_t* config) = 0;
+
+    /**
      * @brief Wrapper to perform an I2C write operation
      * 
      * @param pData - Data to be sent on the bus

@@ -1,7 +1,8 @@
 /*
 * Copyright 2026 - Nicholas Milas Clk project
-* @brief Definition of the class to wrap the esp-idf i2c_master class.
+* Definition of the class to wrap the esp-idf i2c_master class.
 */
+
 #include "I2CBusMaster.hpp"
 
 I2CBusMaster::I2CBusMaster() :
@@ -12,7 +13,7 @@ I2CBusMaster::I2CBusMaster() :
     printf("Successfully created i2c bus %d", mBusConfig.i2c_port);
 }
 
-Status_t I2CBusMaster::addDevice(i2c_device_config_t* config)
+Status_t I2CBusMaster::addDevice(const i2c_device_config_t* config)
 {
     Status_t status{Status_t::Success};
     do
@@ -74,7 +75,7 @@ Status_t I2CBusMaster::read(uint16_t address, uint8_t* pData, size_t length)
         if (pData != nullptr)
         {
             i2c_master_dev_handle_t& dev{iter->second};
-            esp_err_t err{i2c_master_transmit(dev, pData, length, -1)}; // -1 means to wait forever for this transmition
+            esp_err_t err{i2c_master_receive(dev, pData, length, -1)}; // -1 means to wait forever for this transmition
             if (err == ESP_OK)
             {
                 // Skadoosh
