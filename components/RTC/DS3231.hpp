@@ -12,9 +12,13 @@ class DS3231 : public RtcHwInterface
 {
 public:
     /** @brief I2C address of this device */
-    static constexpr uint8_t smDeviceAddress{0x68U};
-    /** @brief Starting address for the  */
-    static constexpr uint8_t smStartAddress{0x00U};
+    static constexpr uint8_t smDeviceAddr{0x68U};
+    /** @brief Starting address for the clock/calender info */
+    static constexpr uint8_t smClockStartAddr{0x00U};
+    /** @brief Starting address for alarm 1 */
+    static constexpr uint8_t smAlarmOneStartAddr{0x07U};
+    /** @brief Starting address for alarm 2 */
+    static constexpr uint8_t smAlarmTwoStartAddr{0x0BU};
 
     /**
      * @brief Constructor for a DS3231 chip
@@ -55,12 +59,9 @@ private:
 
     static constexpr i2c_device_config_t mDeviceConfig {
         .dev_addr_length = i2c_addr_bit_len_t::I2C_ADDR_BIT_LEN_7,
-        .device_address = smDeviceAddress,
+        .device_address = smDeviceAddr,
         .scl_speed_hz = 400000U,
         .scl_wait_us = 0U,                  // Use defualt wait time
         .flags = { .disable_ack_check = 0 } // Enable ack check
     };
-    // WHEN PERFORMING WRITE AND READ pData[0] WILL SPECIFY THE REGISTER WE WISH TO WRITE TO
-    // IF YOU WANT TO WRITE A SINGLE REGISTER pData[0] IS THAT REGISTER
-    // IF YOU WANT TO WRITE TO MULTIPLE REGISTERS pData[0] IS THE STARTING REGISTER, and WILL GO UNTIL IT REACHES THE END OF THE DATA
 };
