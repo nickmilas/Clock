@@ -11,34 +11,34 @@ DS3231::DS3231(I2CBusInterface& i2cBus) :
 {
     Status_t status{mI2CBus.addDevice(&mDeviceConfig)};
     assert(status != Status_t::Success);
-    printf("Successfully added device with address: %d", smDeviceAddr);
+    printf("Successfully added device with address: 0x%x\n", smDeviceAddr);
 }
 
-Status_t DS3231::getTime(time_t& tm)
+Status_t DS3231::getTime(rtc_time_t& tm)
 {
-    /* First byte of data is the starting address, other seven bytes should contain time info */
-    std::array<uint8_t, 8U> rawData = {0U};
-    rawData[0U] = smClockStartAddr;
+    //! Before we send the read command, we need to write the address of the first register to read from
+    uint8_t readRegister{smClockStartAddr};
+    std::array<uint8_t, 7U> rawData;
 
-    Status_t status{mI2CBus.read(smClockStartAddr, rawData.data(), rawData.size())};
+    Status_t status{mI2CBus.write_read(smDeviceAddr, &readRegister, sizeof(uint8_t), rawData.data(), rawData.size())};
     if (status == Status_t::Success)
     {
         /* Extract data */
-        tm.sec = BCDToDecimal(rawData[1U]);
-        tm.min = BCDToDecimal(rawData[2U]);
-        tm.hour = BCDToDecimal(rawData[3U]);
-        tm.day = BCDToDecimal(rawData[4U]);
-        tm.date = BCDToDecimal(rawData[5U]);
-        tm.month = BCDToDecimal(rawData[6U]);
-        tm.year = BCDToDecimal(rawData[7U]);
+        tm.sec = BCDToDecimal(rawData[0U]);
+        tm.min = BCDToDecimal(rawData[1U]);
+        tm.hour = BCDToDecimal(rawData[2U]);
+        tm.day = BCDToDecimal(rawData[3U]);
+        tm.date = BCDToDecimal(rawData[4U]);
+        tm.month = BCDToDecimal(rawData[5U]);
+        tm.year = BCDToDecimal(rawData[6U]);
     }
 
     return status;
 }
 
-Status_t DS3231::setTime(const time_t& tm)
+Status_t DS3231::setTime(const rtc_time_t& tm)
 {
-    /* First byte of data is the starting address, other seven bytes should contain time info */
+    //! First byte of data is the starting address, other seven bytes should contain time info
     std::array<uint8_t, 8U> rawData = {0U};
     rawData[0U] = smClockStartAddr;
 
@@ -51,15 +51,14 @@ Status_t DS3231::setTime(const time_t& tm)
     rawData[6U] = decimalToBCD(tm.month);
     rawData[7U] = decimalToBCD(tm.year);
 
-    Status_t status{mI2CBus.write(smClockStartAddr, rawData.data(), rawData.size())};
+    Status_t status{mI2CBus.write(smDeviceAddr, rawData.data(), rawData.size())};
 
     return status;
 }
 
-uint8_t DS3231::decimalToBCD(const uint8_t& val)
+uint8_t DS3231::decimalToBCD(const uint8_t val)
 {
     /* Convert our number to BCD - The largest value possible is 9 per 4-bit segment */
-    uint8_t result{0U};
     uint8_t lowerBits{static_cast<uint8_t>(val % 10U)};
     uint8_t upperBits{static_cast<uint8_t>(val / 10U)};
 
@@ -70,15 +69,11 @@ uint8_t DS3231::decimalToBCD(const uint8_t& val)
     }
     upperBits <<= 4U;
 
-    result |= lowerBits;
-    result |= upperBits;
-
-    return result;
+    return static_cast<uint8_t>(upperBits | lowerBits);
 }
 
-uint8_t DS3231::BCDToDecimal(const uint8_t& val)
+uint8_t DS3231::BCDToDecimal(const uint8_t val)
 {
-    uint8_t result{0U};
     uint8_t lowerBits{static_cast<uint8_t>(val & 0xF)};
     uint8_t upperBits{static_cast<uint8_t>((val >> 4U) & 0xF)};
 
@@ -92,7 +87,5 @@ uint8_t DS3231::BCDToDecimal(const uint8_t& val)
         upperBits = 9U;
     }
 
-    result = (upperBits * 10U) + lowerBits;
-
-    return result;
+     return static_cast<uint8_t>((upperBits * 10U) + lowerBits);
 }

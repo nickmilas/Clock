@@ -33,9 +33,9 @@ public:
     ~DS3231() override = default;
 
     /** @copydoc RtcHwInterface::getTime */
-    Status_t getTime(time_t& tm);
+    Status_t getTime(rtc_time_t& tm) override;
     /** @copydoc RtcHwInterface::setTime */
-    Status_t setTime(const time_t& tm);
+    Status_t setTime(const rtc_time_t& tm) override;
 
 private:
     /**
@@ -44,7 +44,7 @@ private:
      * @param val - Value to convert
      * @return uint8_t - Value in BCD
      */
-    uint8_t decimalToBCD(const uint8_t& val);
+    uint8_t decimalToBCD(const uint8_t val);
 
     /**
      * @brief Helper function to convert from binary-coded decimal to decimal
@@ -52,7 +52,7 @@ private:
      * @param val - Value to convert
      * @return uint8_t - Value in Decimal
      */
-    uint8_t BCDToDecimal(const uint8_t& val);
+    uint8_t BCDToDecimal(const uint8_t val);
 
     /** @brief I2C bus interface to perform read and write operations */
     I2CBusInterface& mI2CBus;
