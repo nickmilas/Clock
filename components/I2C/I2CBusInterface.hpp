@@ -26,7 +26,7 @@ public:
      * 
      * @param config - Configuration info for the device to be added to the bus
      */
-    virtual Status_t addDevice(const i2c_device_config_t* config) = 0;
+    virtual Status_t addDevice(const i2c_device_config_t* config, i2c_master_dev_handle_t newDevice) = 0;
 
     /**
      * @brief Wrapper to perform an I2C write operation

@@ -10,18 +10,26 @@ extern "C" void app_main(void)
     DS3231 rtc{bus};
 
     rtc_time_t tm{};
-    tm.sec = 10U;
-    tm.min = 48U;
-    tm.hour = 9U;
+    tm.sec = 50U;
+    tm.min = 59U;
+    tm.hour = 12U;
     tm.day = 1U;
     tm.date = 8U;
     tm.month = 3U;
     tm.year = 26U;
 
+    rtc.setStandardTime(true); // Set standard time
+    rtc.setMorningOrAfternoon(false);
     Status_t setStatus{rtc.setTime(tm)};
     if (setStatus == Status_t::Success)
     {
-        printf("Time is set to %d/%d/%d - %d:%d:%d\n", tm.month, tm.date, tm.year, tm.hour, tm.min, tm.sec);
+            printf("Time is read is %d/%d/%d - %d:%d:%d%s\n", tm.month,
+                                                        tm.date,
+                                                        tm.year,
+                                                        tm.hour,
+                                                        tm.min,
+                                                        tm.sec,
+                                                        (rtc.isAfternoon()) ? "pm" : "am");
     }
     else
     {
@@ -35,7 +43,13 @@ extern "C" void app_main(void)
         Status_t getStatus{rtc.getTime(readTime)};
         if (getStatus == Status_t::Success)
         {
-            printf("Time is read is %d/%d/%d - %d:%d:%d\n", readTime.month, readTime.date, readTime.year, readTime.hour, readTime.min, readTime.sec);
+            printf("Time is read is %d/%d/%d - %d:%d:%d%s\n", readTime.month,
+                                                        readTime.date,
+                                                        readTime.year,
+                                                        readTime.hour,
+                                                        readTime.min,
+                                                        readTime.sec,
+                                                        (rtc.isAfternoon()) ? "pm" : "am");
         }
         else
         {

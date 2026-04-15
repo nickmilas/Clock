@@ -6,14 +6,14 @@
 #include "I2CBusMaster.hpp"
 
 I2CBusMaster::I2CBusMaster() :
-    I2CBusInterface{}
+    I2CBusInterface()
 {
     esp_err_t err{i2c_new_master_bus(&mBusConfig, &mHandle)};
     assert(err == ESP_OK); // Make sure we created this bus properly, otherwise blow shit up !!!
     printf("Successfully created i2c bus 0x%x\n", mBusConfig.i2c_port);
 }
 
-Status_t I2CBusMaster::addDevice(const i2c_device_config_t* config)
+Status_t I2CBusMaster::addDevice(const i2c_device_config_t* config, i2c_master_dev_handle_t newDevice)
 {
     Status_t status{Status_t::Success};
     do
@@ -24,7 +24,6 @@ Status_t I2CBusMaster::addDevice(const i2c_device_config_t* config)
             break;
         }
 
-        i2c_master_dev_handle_t newDevice;
         esp_err_t err{i2c_master_bus_add_device(mHandle, config, &newDevice)};
         if (err != ESP_OK)
         {
@@ -33,7 +32,7 @@ Status_t I2CBusMaster::addDevice(const i2c_device_config_t* config)
             break;
         }
 
-        if (mDeviceToHandle.insert({config->device_address, newDevice}).second)
+        if (!mDeviceToHandle.insert({config->device_address, newDevice}).second)
         {
             // Duplicate device?
             status = Status_t::Error;

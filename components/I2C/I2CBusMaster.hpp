@@ -27,7 +27,7 @@ public:
      * 
      * @param config - Configuration details of the device to be added to the bus
      */
-    Status_t addDevice(const i2c_device_config_t* config);
+    Status_t addDevice(const i2c_device_config_t* config, i2c_master_dev_handle_t newDevice);
     /** @copydoc I2CBusInterface::write */
     Status_t write(uint16_t address, uint8_t* pData, size_t length) override;
     /** @copydoc I2CBusInterface::read */

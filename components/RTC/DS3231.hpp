@@ -42,6 +42,11 @@ public:
     /** @brief Returns the 12/!24 bit status */
     bool isStandardTime() const { return mIsStandardTime; }
 
+    /** @brief Set whethere we are interpretting time as !AM/PM */
+    void setMorningOrAfternoon(bool isAfternoon) { mIsAfternoon = isAfternoon; }
+    /** @brief Returns the !AM/PM bit status */
+    bool isAfternoon() const { return mIsAfternoon; }
+
     /** @brief Set the clock to set the century bit */
     void setCenturyBit(bool isNewCentury) { mIsCenturyBitOn = isNewCentury; }
     /** @brief Returns the century bit status */
@@ -66,10 +71,14 @@ private:
 
     /** @brief Flag indicating how we should interpret the current hour reading */
     bool mIsStandardTime{false};
+    /** @brief Flag indicating whether time is in AM or PM (only matters if we are using standard time - default to morning) */
+    bool mIsAfternoon{false};
     /** @brief Flag indicating whether or not the century bit is on (default to 21st century) */
     bool mIsCenturyBitOn{false};
     /** @brief I2C bus interface to perform read and write operations */
     I2CBusInterface& mI2CBus;
+    /** @brief Device handle pointer that needs to persist through runtime */
+    i2c_master_dev_handle_t mDeviceHandle;
     /** @brief Configuration info for the DD3231 chip */
     static constexpr i2c_device_config_t mDeviceConfig {
         .dev_addr_length = i2c_addr_bit_len_t::I2C_ADDR_BIT_LEN_7,
