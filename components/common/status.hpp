@@ -8,7 +8,7 @@
 #include <cstdint>
 
 /** @brief Enum to get abstracted away from esp-idf return codes */
-enum class Status_t : uint8_t
+enum class EStatus : uint8_t
 {
     Success = 0U,        // Successful operation
     Error,              // Generic catch-all

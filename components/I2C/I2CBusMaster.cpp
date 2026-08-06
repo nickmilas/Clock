@@ -13,14 +13,14 @@ I2CBusMaster::I2CBusMaster() :
     printf("Successfully created i2c bus 0x%x\n", mBusConfig.i2c_port);
 }
 
-Status_t I2CBusMaster::addDevice(const i2c_device_config_t* config, i2c_master_dev_handle_t newDevice)
+EStatus I2CBusMaster::addDevice(const i2c_device_config_t* config, i2c_master_dev_handle_t newDevice)
 {
-    Status_t status{Status_t::Success};
+    EStatus status{EStatus::Success};
     do
     {
         if (config == nullptr)
         {
-            status = Status_t::Memory;
+            status = EStatus::Memory;
             break;
         }
 
@@ -28,23 +28,23 @@ Status_t I2CBusMaster::addDevice(const i2c_device_config_t* config, i2c_master_d
         if (err != ESP_OK)
         {
             // Make sure this device was added properly to the bus
-            status = Status_t::Error;
+            status = EStatus::Error;
             break;
         }
 
         if (!mDeviceToHandle.insert({config->device_address, newDevice}).second)
         {
             // Duplicate device?
-            status = Status_t::Error;
+            status = EStatus::Error;
             break;
         }
     } while(0U);
     return status;
 }
 
-Status_t I2CBusMaster::write(uint16_t address, uint8_t* pData, size_t length)
+EStatus I2CBusMaster::write(uint16_t address, uint8_t* pData, size_t length)
 {
-    Status_t status{Status_t::Error};
+    EStatus status{EStatus::Error};
 
     auto iter{mDeviceToHandle.find(address)};
     if (iter != mDeviceToHandle.end())
@@ -56,11 +56,11 @@ Status_t I2CBusMaster::write(uint16_t address, uint8_t* pData, size_t length)
             if (err == ESP_OK)
             {
                 // Woohoo!
-                status = Status_t::Success;
+                status = EStatus::Success;
             }
             else
             {
-                printf("Transmit error: %s", esp_err_to_name(err));
+                printf("Transmit error: %s\n", esp_err_to_name(err));
             }
         }
         else
@@ -76,9 +76,9 @@ Status_t I2CBusMaster::write(uint16_t address, uint8_t* pData, size_t length)
     return status;
 }
 
-Status_t I2CBusMaster::read(uint16_t address, uint8_t* pData, size_t length)
+EStatus I2CBusMaster::read(uint16_t address, uint8_t* pData, size_t length)
 {
-    Status_t status{Status_t::Error};
+    EStatus status{EStatus::Error};
 
     auto iter{mDeviceToHandle.find(address)};
     if (iter != mDeviceToHandle.end())
@@ -90,11 +90,11 @@ Status_t I2CBusMaster::read(uint16_t address, uint8_t* pData, size_t length)
             if (err == ESP_OK)
             {
                 // Skadoosh
-                status = Status_t::Success;
+                status = EStatus::Success;
             }
             else
             {
-                printf("Receive error: %s", esp_err_to_name(err));
+                printf("Receive error: %s\n", esp_err_to_name(err));
             }
         }
         else
@@ -110,9 +110,9 @@ Status_t I2CBusMaster::read(uint16_t address, uint8_t* pData, size_t length)
     return status;
 }
 
-Status_t I2CBusMaster::write_read(uint16_t address, uint8_t* writeBuff, size_t writeLength, uint8_t* readBuff, size_t readLength)
+EStatus I2CBusMaster::write_read(uint16_t address, uint8_t* writeBuff, size_t writeLength, uint8_t* readBuff, size_t readLength)
 {
-    Status_t status{Status_t::Error};
+    EStatus status{EStatus::Error};
 
     auto iter{mDeviceToHandle.find(address)};
     if (iter != mDeviceToHandle.end())
@@ -124,11 +124,11 @@ Status_t I2CBusMaster::write_read(uint16_t address, uint8_t* writeBuff, size_t w
             if (err == ESP_OK)
             {
                 // Oh yeah
-                status = Status_t::Success;
+                status = EStatus::Success;
             }
             else
             {
-                printf("Transmit_receive error: %s", esp_err_to_name(err));
+                printf("Transmit_receive error: %s\n", esp_err_to_name(err));
             }
         }
         else

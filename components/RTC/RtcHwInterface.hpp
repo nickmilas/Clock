@@ -12,10 +12,6 @@ class RtcHwInterface
 {
 public:
     /**
-     * @brief Structure used to keep track of time/calender data
-     */
-
-    /**
      * @brief Default constructor.
      */
     RtcHwInterface() = default;
@@ -29,17 +25,25 @@ public:
      * @brief Read the time off of an RTC device
      * 
      * @param tm - The time read off of the RTC
-     * @return Status_t - Whether or not the read was successful
+     * @return EStatus - Whether or not the read was successful
      */
-    virtual Status_t getTime(clock::rtc_time_t& tm) = 0;
+    virtual EStatus getTime(clock::rtc_time_t& tm) = 0;
 
     /**
      * @brief Set the Time object
      * 
      * @param tm - The time to set on the RTC
-     * @return Status_t - Whether or not the write was successful
+     * @return EStatus - Whether or not the write was successful
      */
-    virtual Status_t setTime(const clock::rtc_time_t& tm) = 0;
+    virtual EStatus setTime(const clock::rtc_time_t& tm) = 0;
+
+    /**
+     * @brief Set an alarm based off the Time struct
+     * 
+     * @param tm - The time used to set the alarm
+     * @return EStatus - Whether or not the alarm was set successfully
+     */
+    virtual EStatus setAlarm(const clock::rtc_alarm_t& tm, clock::EAlarm alarm) = 0;
 
 private:
     RtcHwInterface(const RtcHwInterface&) = delete;                 //! Delete copy-assignment constructors explicitly

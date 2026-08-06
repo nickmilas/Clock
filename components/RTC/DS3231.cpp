@@ -4,25 +4,25 @@
 */
 
 #include "DS3231.hpp"
-#include <array>
+#include <vector>
 
 DS3231::DS3231(I2CBusInterface& i2cBus) :
     RtcHwInterface(),
     mI2CBus{i2cBus}
 {
-    Status_t status{mI2CBus.addDevice(&mDeviceConfig, mDeviceHandle)};
-    assert(status == Status_t::Success);
+    EStatus status{mI2CBus.addDevice(&mDeviceConfig, mDeviceHandle)};
+    assert(status == EStatus::Success);
     printf("Successfully added device with address: 0x%x\n", smDeviceAddr);
 }
 
-Status_t DS3231::getTime(clock::rtc_time_t& tm)
+EStatus DS3231::getTime(clock::rtc_time_t& tm)
 {
     //! Before we send the read command, we need to write the address of the first register to read from
     uint8_t readRegister{smClockStartAddr};
     std::array<uint8_t, 7U> rawData;
 
-    Status_t status{mI2CBus.write_read(smDeviceAddr, &readRegister, sizeof(uint8_t), rawData.data(), rawData.size())};
-    if (status == Status_t::Success)
+    EStatus status{mI2CBus.write_read(smDeviceAddr, &readRegister, sizeof(uint8_t), rawData.data(), rawData.size())};
+    if (status == EStatus::Success)
     {
         /* Check for century + am/pm + 12/24 bit changes */
         uint8_t afternoonBitMask{(1U << 5U)};
@@ -51,13 +51,13 @@ Status_t DS3231::getTime(clock::rtc_time_t& tm)
     return status;
 }
 
-Status_t DS3231::setTime(const clock::rtc_time_t& tm)
+EStatus DS3231::setTime(const clock::rtc_time_t& tm)
 {
     //! First byte of data is the starting address, other seven bytes should contain time info
     uint8_t standardTimeBit;
     uint8_t afternoonBit;
-    std::array<uint8_t, 8U> rawData = {0U};
     uint8_t centuryBit{(isCenturyBitOn()) ? static_cast<uint8_t>(1U << 7U) : static_cast<uint8_t>(0U)};
+    std::array<uint8_t, 8U> rawData = {0U};
 
     if (isStandardTime())
     {
@@ -81,6 +81,52 @@ Status_t DS3231::setTime(const clock::rtc_time_t& tm)
     rawData[7U] = decimalToBCD(tm.year);
 
     return mI2CBus.write(smDeviceAddr, rawData.data(), rawData.size());
+}
+
+EStatus DS3231::setAlarm(const clock::rtc_alarm_t& tm, clock::EAlarm alarm)
+{
+    uint8_t standardTimeBit;
+    uint8_t afternoonBit;
+    uint8_t expirationBit{static_cast<uint8_t>(1U << 7U)};
+    std::vector<uint8_t> rawData;
+
+    if (isStandardTime())
+    {
+        standardTimeBit = static_cast<uint8_t>(1U << 6U);
+        afternoonBit = (isAfternoon()) ? static_cast<uint8_t>(1U << 5U) : static_cast<uint8_t>(0U);
+    }
+    else
+    {
+        standardTimeBit = 0U;
+        afternoonBit = 0U;
+    }
+
+    if (alarm == clock::EAlarm::Alarm)
+    {
+        rawData.push_back(smAlarmOneStartAddr);
+        rawData.push_back(0U); // If we are an alarm, we always want to match at 0 seconds
+        rawData.push_back(decimalToBCD(tm.min));
+        rawData.push_back(decimalToBCD(tm.hour) | standardTimeBit | afternoonBit);
+        rawData.push_back(expirationBit); // Need to set the A1M4 bit so the timer will go off when hours/minutes/seconds match
+    }
+    else // We are a timer
+    {
+        uint8_t shortTimerBit{(tm.isShortTimer) ? static_cast<uint8_t>(1U << 7U) : static_cast<uint8_t>(0U)};
+        rawData.push_back(smAlarmTwoStartAddr);
+        rawData.push_back(decimalToBCD(tm.min));
+        rawData.push_back(decimalToBCD(tm.hour) | standardTimeBit | afternoonBit | shortTimerBit); // If isShortTimer, then go off when minutes match
+        rawData.push_back(expirationBit); // Need to set the A1M4 bit so the timer will go off when hours/minutes match
+    }
+
+    /* Let's make sure the alarm is actually on */
+    EStatus status{setAlarmBit(alarm)};
+    if (status == EStatus::Success)
+    {
+        // Nice.
+        status = mI2CBus.write(smDeviceAddr, rawData.data(), rawData.size());
+    }
+
+    return status;
 }
 
 uint8_t DS3231::decimalToBCD(const uint8_t val)
@@ -115,4 +161,22 @@ uint8_t DS3231::BCDToDecimal(const uint8_t val)
     }
 
      return static_cast<uint8_t>((upperBits * 10U) + lowerBits);
+}
+
+EStatus DS3231::setAlarmBit(clock::EAlarm alarm)
+{
+    /* Let's read the control register and then add in our new alarm bit (don't want to overwrite everything) */
+    uint8_t controlRegister{0U};
+    uint8_t address{smControlAddr};
+
+    EStatus status{mI2CBus.write_read(smDeviceAddr, &address, sizeof(uint8_t), &controlRegister, sizeof(uint8_t))};
+    if (status != EStatus::Success)
+    {
+        printf("Failed to set an alarm: %d", static_cast<uint8_t>(alarm));
+        return status;
+    }
+
+    controlRegister |= (alarm == clock::EAlarm::Alarm) ? static_cast<uint8_t>(1U) : static_cast<uint8_t>(1U << 1U);
+    std::array<uint8_t, 2U> writeData{ smControlAddr, controlRegister };
+    return mI2CBus.write(smDeviceAddr, writeData.data(), writeData.size());
 }

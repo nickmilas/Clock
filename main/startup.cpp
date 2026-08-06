@@ -11,16 +11,16 @@ extern "C" void app_main(void)
     DS3231 rtc{bus};
 
     clock::rtc_time_t tm{};
-    tm.sec = 50U;
-    tm.min = 59U;
-    tm.hour = 11U;
+    tm.sec = 0U;
+    tm.min = 7U;
+    tm.hour = 8U;
     tm.day = 1U;
-    tm.date = 8U;
-    tm.month = 3U;
+    tm.date = 23U;
+    tm.month = 4U;
     tm.year = 26U;
 
-    Status_t setStatus{rtc.setTime(tm)};
-    if (setStatus == Status_t::Success)
+    EStatus setStatus{rtc.setTime(tm)};
+    if (setStatus == EStatus::Success)
     {
             printf("Time is read is %d/%d/%d - %d:%d:%d%s\n", tm.month,
                                                         tm.date,
@@ -39,8 +39,8 @@ extern "C" void app_main(void)
     {
         vTaskDelay(pdMS_TO_TICKS(1000U)); // 1 second intervals
         clock::rtc_time_t readTime{};
-        Status_t getStatus{rtc.getTime(readTime)};
-        if (getStatus == Status_t::Success)
+        EStatus getStatus{rtc.getTime(readTime)};
+        if (getStatus == EStatus::Success)
         {
             printf("Time is read is %d/%d/%d - %d:%d:%d%s\n", readTime.month,
                                                         readTime.date,

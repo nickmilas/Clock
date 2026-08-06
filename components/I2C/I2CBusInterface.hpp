@@ -26,7 +26,7 @@ public:
      * 
      * @param config - Configuration info for the device to be added to the bus
      */
-    virtual Status_t addDevice(const i2c_device_config_t* config, i2c_master_dev_handle_t newDevice) = 0;
+    virtual EStatus addDevice(const i2c_device_config_t* config, i2c_master_dev_handle_t newDevice) = 0;
 
     /**
      * @brief Wrapper to perform an I2C write operation
@@ -35,7 +35,7 @@ public:
      * @param pData - Data to be sent on the bus
      * @param length - How many bytes of data to send
      */
-    virtual Status_t write(uint16_t address, uint8_t* pData, size_t length) = 0;
+    virtual EStatus write(uint16_t address, uint8_t* pData, size_t length) = 0;
 
     /**
      * @brief Wrapper to perform an I2C read operation
@@ -44,7 +44,7 @@ public:
      * @param pData - Data to be sent on the bus
      * @param length - How many bytes of data to send
      */
-    virtual Status_t read(uint16_t address, uint8_t* pData, size_t length) = 0;
+    virtual EStatus read(uint16_t address, uint8_t* pData, size_t length) = 0;
 
     /**
      * @brief Wrapper to perform an I2C write/read operation - Needed to perform multi-register reads
@@ -55,7 +55,7 @@ public:
      * @param readBuff - Data to be read
      * @param readLength - Amount of data to be read
      */
-    virtual Status_t write_read(uint16_t address, uint8_t* writeBuff, size_t writeLength, uint8_t* readBuff, size_t readLength) = 0;
+    virtual EStatus write_read(uint16_t address, uint8_t* writeBuff, size_t writeLength, uint8_t* readBuff, size_t readLength) = 0;
 
 private:
     I2CBusInterface(const I2CBusInterface&) = delete;                 //! Delete copy-assignment constructors explicitly

@@ -20,6 +20,21 @@ namespace clock {
         uint8_t year;
     } rtc_time_t;
 
+    /** @brief Struct to represent an alarm stored within the rtc */
+    typedef struct {
+        uint8_t min;
+        uint8_t hour;
+        bool isShortTimer; // Under an hour
+    } rtc_alarm_t;
+
+    /** @brief Enum class to represent whether we are setting an alarm or a timer */
+    enum class EAlarm : uint8_t {
+        Timer = 0,
+        Alarm,
+
+        Size
+    };
+
     /** @brief Enum class to respresent the days of the week */
     enum class day_t : uint8_t {
         Sunday = 0,

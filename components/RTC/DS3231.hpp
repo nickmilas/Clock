@@ -7,6 +7,7 @@
 
 #include "RtcHwInterface.hpp"
 #include "I2CBusInterface.hpp"
+#include <array>
 
 class DS3231 : public RtcHwInterface
 {
@@ -24,9 +25,11 @@ public:
     ~DS3231() override = default;
 
     /** @copydoc RtcHwInterface::getTime */
-    Status_t getTime(clock::rtc_time_t& tm) override;
+    EStatus getTime(clock::rtc_time_t& tm) override;
     /** @copydoc RtcHwInterface::setTime */
-    Status_t setTime(const clock::rtc_time_t& tm) override;
+    EStatus setTime(const clock::rtc_time_t& tm) override;
+    /** @copydoc RtcHwInterface::setAlarm */
+    EStatus setAlarm(const clock::rtc_alarm_t& tm, clock::EAlarm alarm) override;
 
     /** @brief Set the clock to read standard time (active high for standard time - active low for military time) */
     void setStandardTime(bool isStandardTime) { mIsStandardTime = isStandardTime; }
@@ -51,6 +54,10 @@ public:
     static constexpr uint8_t smAlarmOneStartAddr{0x07U};
     /** @brief Starting address for alarm 2 */
     static constexpr uint8_t smAlarmTwoStartAddr{0x0BU};
+    /** @brief Control register address */
+    static constexpr uint8_t smControlAddr{0x0EU};
+    /** @brief Control/Status register address */
+    static constexpr uint8_t smControlStatusAddr{0x0FU};
 
 private:
     /**
@@ -68,6 +75,14 @@ private:
      * @return uint8_t - Value in Decimal
      */
     uint8_t BCDToDecimal(const uint8_t val);
+    
+    /**
+     * @brief Helper function to turn on either alarm bit
+     * 
+     * @param alarm - The alarm (1 or 2) we are going to turn on
+     * @return EStatus - Whether the writes were successful or not
+     */
+    EStatus setAlarmBit(clock::EAlarm alarm);
 
     /** @brief Flag indicating how we should interpret the current hour reading (standard time by default) */
     bool mIsStandardTime{true};
