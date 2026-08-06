@@ -15,7 +15,7 @@ DS3231::DS3231(I2CBusInterface& i2cBus) :
     printf("Successfully added device with address: 0x%x\n", smDeviceAddr);
 }
 
-Status_t DS3231::getTime(rtc_time_t& tm)
+Status_t DS3231::getTime(clock::rtc_time_t& tm)
 {
     //! Before we send the read command, we need to write the address of the first register to read from
     uint8_t readRegister{smClockStartAddr};
@@ -51,7 +51,7 @@ Status_t DS3231::getTime(rtc_time_t& tm)
     return status;
 }
 
-Status_t DS3231::setTime(const rtc_time_t& tm)
+Status_t DS3231::setTime(const clock::rtc_time_t& tm)
 {
     //! First byte of data is the starting address, other seven bytes should contain time info
     uint8_t standardTimeBit;

@@ -11,15 +11,6 @@
 class DS3231 : public RtcHwInterface
 {
 public:
-    /** @brief I2C address of this device */
-    static constexpr uint8_t smDeviceAddr{0x68U};
-    /** @brief Starting address for the clock/calender info */
-    static constexpr uint8_t smClockStartAddr{0x00U};
-    /** @brief Starting address for alarm 1 */
-    static constexpr uint8_t smAlarmOneStartAddr{0x07U};
-    /** @brief Starting address for alarm 2 */
-    static constexpr uint8_t smAlarmTwoStartAddr{0x0BU};
-
     /**
      * @brief Constructor for a DS3231 chip
      * 
@@ -33,9 +24,9 @@ public:
     ~DS3231() override = default;
 
     /** @copydoc RtcHwInterface::getTime */
-    Status_t getTime(rtc_time_t& tm) override;
+    Status_t getTime(clock::rtc_time_t& tm) override;
     /** @copydoc RtcHwInterface::setTime */
-    Status_t setTime(const rtc_time_t& tm) override;
+    Status_t setTime(const clock::rtc_time_t& tm) override;
 
     /** @brief Set the clock to read standard time (active high for standard time - active low for military time) */
     void setStandardTime(bool isStandardTime) { mIsStandardTime = isStandardTime; }
@@ -51,6 +42,15 @@ public:
     void setCenturyBit(bool isNewCentury) { mIsCenturyBitOn = isNewCentury; }
     /** @brief Returns the century bit status */
     bool isCenturyBitOn() const { return mIsCenturyBitOn; }
+
+    /** @brief I2C address of this device */
+    static constexpr uint8_t smDeviceAddr{0x68U};
+    /** @brief Starting address for the clock/calender info */
+    static constexpr uint8_t smClockStartAddr{0x00U};
+    /** @brief Starting address for alarm 1 */
+    static constexpr uint8_t smAlarmOneStartAddr{0x07U};
+    /** @brief Starting address for alarm 2 */
+    static constexpr uint8_t smAlarmTwoStartAddr{0x0BU};
 
 private:
     /**
@@ -69,8 +69,8 @@ private:
      */
     uint8_t BCDToDecimal(const uint8_t val);
 
-    /** @brief Flag indicating how we should interpret the current hour reading */
-    bool mIsStandardTime{false};
+    /** @brief Flag indicating how we should interpret the current hour reading (standard time by default) */
+    bool mIsStandardTime{true};
     /** @brief Flag indicating whether time is in AM or PM (only matters if we are using standard time - default to morning) */
     bool mIsAfternoon{false};
     /** @brief Flag indicating whether or not the century bit is on (default to 21st century) */

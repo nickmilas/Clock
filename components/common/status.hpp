@@ -1,9 +1,14 @@
+/*
+ * Copyright 2026 - Nicholas Milas Clk project
+ * @brief Enum class to represent a generic return status.
+*/
+
 #pragma once
 
 #include <cstdint>
 
 /** @brief Enum to get abstracted away from esp-idf return codes */
-enum Status_t : uint8_t
+enum class Status_t : uint8_t
 {
     Success = 0U,        // Successful operation
     Error,              // Generic catch-all
@@ -13,13 +18,3 @@ enum Status_t : uint8_t
 
     Size                // Number of status types
 };
-
-typedef struct {
-    uint8_t sec;
-    uint8_t min;
-    uint8_t hour;
-    uint8_t day;
-    uint8_t date;
-    uint8_t month;
-    uint8_t year;
-} rtc_time_t;

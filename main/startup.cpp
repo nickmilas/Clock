@@ -1,3 +1,4 @@
+#include "clock_enums.hpp"
 #include "DS3231.hpp"
 #include "I2CBusMaster.hpp"
 #include "freertos/FreeRTOS.h"
@@ -9,17 +10,15 @@ extern "C" void app_main(void)
     I2CBusMaster bus;
     DS3231 rtc{bus};
 
-    rtc_time_t tm{};
+    clock::rtc_time_t tm{};
     tm.sec = 50U;
     tm.min = 59U;
-    tm.hour = 12U;
+    tm.hour = 11U;
     tm.day = 1U;
     tm.date = 8U;
     tm.month = 3U;
     tm.year = 26U;
 
-    rtc.setStandardTime(true); // Set standard time
-    rtc.setMorningOrAfternoon(false);
     Status_t setStatus{rtc.setTime(tm)};
     if (setStatus == Status_t::Success)
     {
@@ -39,7 +38,7 @@ extern "C" void app_main(void)
     while (1)
     {
         vTaskDelay(pdMS_TO_TICKS(1000U)); // 1 second intervals
-        rtc_time_t readTime{};
+        clock::rtc_time_t readTime{};
         Status_t getStatus{rtc.getTime(readTime)};
         if (getStatus == Status_t::Success)
         {

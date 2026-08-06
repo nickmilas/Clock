@@ -6,6 +6,7 @@
 #pragma once
 
 #include "status.hpp"
+#include "clock_enums.hpp"
 
 class RtcHwInterface
 {
@@ -30,7 +31,7 @@ public:
      * @param tm - The time read off of the RTC
      * @return Status_t - Whether or not the read was successful
      */
-    virtual Status_t getTime(rtc_time_t& tm) = 0;
+    virtual Status_t getTime(clock::rtc_time_t& tm) = 0;
 
     /**
      * @brief Set the Time object
@@ -38,7 +39,7 @@ public:
      * @param tm - The time to set on the RTC
      * @return Status_t - Whether or not the write was successful
      */
-    virtual Status_t setTime(const rtc_time_t& tm) = 0;
+    virtual Status_t setTime(const clock::rtc_time_t& tm) = 0;
 
 private:
     RtcHwInterface(const RtcHwInterface&) = delete;                 //! Delete copy-assignment constructors explicitly
