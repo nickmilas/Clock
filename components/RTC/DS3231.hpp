@@ -5,9 +5,17 @@
 
 #pragma once
 
+extern "C"
+{
+    #include "driver/gpio.h"
+    #include "esp_attr.h"
+}
+
+#include "lambda.hpp"
 #include "RtcHwInterface.hpp"
 #include "I2CBusInterface.hpp"
 #include <array>
+#include <vector>
 
 class DS3231 : public RtcHwInterface
 {
@@ -30,6 +38,10 @@ public:
     EStatus setTime(const clock::rtc_time_t& tm) override;
     /** @copydoc RtcHwInterface::setAlarm */
     EStatus setAlarm(const clock::rtc_alarm_t& tm, clock::EAlarm alarm) override;
+    /** @copydoc RtcHwInterface::clearExpiredFlags */
+    EStatus clearExpiredFlags(bool& isTimerExpired) override;
+    /** @copydoc RtcHwInterface::disableAlarm */
+    EStatus disableAlarm(clock::EAlarm alarmType) override;
 
     /** @brief Set the clock to read standard time (active high for standard time - active low for military time) */
     void setStandardTime(bool isStandardTime) { mIsStandardTime = isStandardTime; }
@@ -37,7 +49,7 @@ public:
     bool isStandardTime() const { return mIsStandardTime; }
 
     /** @brief Set whethere we are interpretting time as !AM/PM */
-    void setMorningOrAfternoon(bool isAfternoon) { mIsAfternoon = isAfternoon; }
+    void setAfternoon(bool isAfternoon) { mIsAfternoon = isAfternoon; }
     /** @brief Returns the !AM/PM bit status */
     bool isAfternoon() const { return mIsAfternoon; }
 
@@ -45,6 +57,11 @@ public:
     void setCenturyBit(bool isNewCentury) { mIsCenturyBitOn = isNewCentury; }
     /** @brief Returns the century bit status */
     bool isCenturyBitOn() const { return mIsCenturyBitOn; }
+
+    /** @brief Function to notify all listeners */
+    void Notify(lambda<RtcHwEvent> event);
+    /** @brief Function to register for RtcHwEvents */
+    void Register(RtcHwEvent& listener) override { mListeners.push_back(&listener); }
 
     /** @brief I2C address of this device */
     static constexpr uint8_t smDeviceAddr{0x68U};
@@ -66,7 +83,7 @@ private:
      * @param val - Value to convert
      * @return uint8_t - Value in BCD
      */
-    uint8_t decimalToBCD(const uint8_t val);
+    uint8_t decimalToBCD(const uint8_t val) const;
 
     /**
      * @brief Helper function to convert from binary-coded decimal to decimal
@@ -74,26 +91,42 @@ private:
      * @param val - Value to convert
      * @return uint8_t - Value in Decimal
      */
-    uint8_t BCDToDecimal(const uint8_t val);
+    uint8_t BCDToDecimal(const uint8_t val) const;
     
     /**
-     * @brief Helper function to turn on either alarm bit
+     * @brief Helper function to enable the corresponding RTC alarm interrupt
      * 
      * @param alarm - The alarm (1 or 2) we are going to turn on
      * @return EStatus - Whether the writes were successful or not
      */
-    EStatus setAlarmBit(clock::EAlarm alarm);
+    EStatus enableAlarm(clock::EAlarm alarm);
 
-    /** @brief Flag indicating how we should interpret the current hour reading (standard time by default) */
-    bool mIsStandardTime{true};
+    /** @brief Helper function to display register values */
+    void dumpRegisters();
+
+    /** @brief Helper function to fire off our alarm expired event
+     *  -> Marking function as static so it does not belong to a DS3231 object and can match the void (*)(void* arg) signature
+     * 
+     * @param pArgs - The object passed in from the task creation / ISR registration
+     */
+    static void taskFunction(void* pArgs);
+    static void IRAM_ATTR alarmExpirationHandler(void* pArgs);
+
+    /** @brief Flag indicating how we should interpret the current hour reading (military time by default on DS3231) */
+    bool mIsStandardTime{false};
     /** @brief Flag indicating whether time is in AM or PM (only matters if we are using standard time - default to morning) */
     bool mIsAfternoon{false};
     /** @brief Flag indicating whether or not the century bit is on (default to 21st century) */
     bool mIsCenturyBitOn{false};
     /** @brief I2C bus interface to perform read and write operations */
     I2CBusInterface& mI2CBus;
+
+    /** @brief List of all components listening for RtcHwEvents */
+    std::vector<RtcHwEvent*> mListeners;
+
     /** @brief Device handle pointer that needs to persist through runtime */
     i2c_master_dev_handle_t mDeviceHandle;
+
     /** @brief Configuration info for the DD3231 chip */
     static constexpr i2c_device_config_t mDeviceConfig {
         .dev_addr_length = i2c_addr_bit_len_t::I2C_ADDR_BIT_LEN_7,
@@ -101,5 +134,14 @@ private:
         .scl_speed_hz = 400000U,
         .scl_wait_us = 0U,                  // Use defualt wait time
         .flags = { .disable_ack_check = 0 } // Enable ack check
+    };
+
+    static constexpr gpio_num_t smInteruptPin{GPIO_NUM_35}; 
+    static constexpr gpio_config_t smInteruptPinConfig = {
+        .pin_bit_mask = static_cast<uint64_t>(1ULL << smInteruptPin),
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_NEGEDGE
     };
 };

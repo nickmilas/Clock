@@ -24,7 +24,6 @@ namespace clock {
     typedef struct {
         uint8_t min;
         uint8_t hour;
-        bool isShortTimer; // Under an hour
     } rtc_alarm_t;
 
     /** @brief Enum class to represent whether we are setting an alarm or a timer */

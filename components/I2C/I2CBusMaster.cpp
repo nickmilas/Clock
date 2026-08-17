@@ -10,7 +10,7 @@ I2CBusMaster::I2CBusMaster() :
 {
     esp_err_t err{i2c_new_master_bus(&mBusConfig, &mHandle)};
     assert(err == ESP_OK); // Make sure we created this bus properly, otherwise blow shit up !!!
-    printf("Successfully created i2c bus 0x%x\n", mBusConfig.i2c_port);
+    printf("I2C: Successfully created i2c bus 0x%x\n", mBusConfig.i2c_port);
 }
 
 EStatus I2CBusMaster::addDevice(const i2c_device_config_t* config, i2c_master_dev_handle_t newDevice)
@@ -60,17 +60,17 @@ EStatus I2CBusMaster::write(uint16_t address, uint8_t* pData, size_t length)
             }
             else
             {
-                printf("Transmit error: %s\n", esp_err_to_name(err));
+                printf("I2C: Transmit error: %s\n", esp_err_to_name(err));
             }
         }
         else
         {
-            printf("Bad data!\n");
+            printf("I2C: Bad data!\n");
         }
     }
     else
     {
-        printf("Could not find device: 0x%x\n", address);
+        printf("I2C: Could not find device: 0x%x\n", address);
     }
 
     return status;
@@ -94,17 +94,17 @@ EStatus I2CBusMaster::read(uint16_t address, uint8_t* pData, size_t length)
             }
             else
             {
-                printf("Receive error: %s\n", esp_err_to_name(err));
+                printf("I2C: Receive error: %s\n", esp_err_to_name(err));
             }
         }
         else
         {
-            printf("Bad data!\n");
+            printf("I2C: Bad data!\n");
         }
     }
     else
     {
-        printf("Could not find device: 0x%x\n", address);
+        printf("I2C: Could not find device: 0x%x\n", address);
     }
 
     return status;
@@ -128,17 +128,17 @@ EStatus I2CBusMaster::write_read(uint16_t address, uint8_t* writeBuff, size_t wr
             }
             else
             {
-                printf("Transmit_receive error: %s\n", esp_err_to_name(err));
+                printf("I2C: Transmit_receive error: %s\n", esp_err_to_name(err));
             }
         }
         else
         {
-            printf("Bad write or read data!\n");
+            printf("I2C: Bad write or read data!\n");
         }
     }
     else
     {
-        printf("Could not find device: 0x%x\n", address);
+        printf("I2C: Could not find device: 0x%x\n", address);
     }
 
     return status;

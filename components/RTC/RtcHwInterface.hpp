@@ -8,6 +8,31 @@
 #include "status.hpp"
 #include "clock_enums.hpp"
 
+class RtcHwEvent
+{
+public:
+    /**
+     * @brief Default constructor.
+     */
+    RtcHwEvent() = default;
+
+    /**
+     * @brief Default destructor.
+     */
+    virtual ~RtcHwEvent() = default;
+
+    /**
+     * @brief Event received from the hardware notifying of an alarm/timer expiration
+     */
+    virtual void eventAlarmExpired() = 0;
+
+private:
+    RtcHwEvent(const RtcHwEvent&) = delete;                 //! Delete copy-assignment constructors explicitly
+    RtcHwEvent& operator=(const RtcHwEvent&) = delete;      //! Delete copy constructors explicitly
+    RtcHwEvent(const RtcHwEvent&&) = delete;                //! Delete move-assignment constructors explicitly
+    RtcHwEvent&& operator=(const RtcHwEvent&&) = delete;    //! Delete move  constructors explicitly
+};
+
 class RtcHwInterface
 {
 public:
@@ -41,9 +66,24 @@ public:
      * @brief Set an alarm based off the Time struct
      * 
      * @param tm - The time used to set the alarm
-     * @return EStatus - Whether or not the alarm was set successfully
+     * @param alarm - Alarm or timer is to be set
      */
     virtual EStatus setAlarm(const clock::rtc_alarm_t& tm, clock::EAlarm alarm) = 0;
+
+    /**
+     * @brief Function to clear alarm flags
+     * @param isTimerExpired - Flag indicating whether an alarm or timer expired
+     */
+    virtual EStatus clearExpiredFlags(bool& isTimerExpired) = 0;
+
+    /**
+     * @brief Disable either the alarm or timer
+     * 
+     * @param alarmType - Enum to decide which to disable
+     */
+    virtual EStatus disableAlarm(clock::EAlarm alarmType) = 0;
+
+    virtual void Register(RtcHwEvent& listener) = 0;
 
 private:
     RtcHwInterface(const RtcHwInterface&) = delete;                 //! Delete copy-assignment constructors explicitly

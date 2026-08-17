@@ -5,7 +5,11 @@
 
 #pragma once
 
-#include "driver/i2c_master.h"
+extern "C"
+{
+    #include "driver/i2c_master.h"
+}
+
 #include "status.hpp"
 
 class I2CBusInterface
