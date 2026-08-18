@@ -16,8 +16,7 @@ extern "C" void app_main(void)
     DS3231 rtc{bus};
     RtcComponent rtcComp{rtc};
 
-    rtc.setStandardTime(true);
-    clock::rtc_time_t tm{23U, 59U, 23U, 1U, 17U, 8U, 26U};
+    clock::rtc_time_t tm{59U, 59U, 23U, 1U, 17U, 8U, 26U};
     std::ignore = rtc.setTime(tm);
 
     clock::rtc_alarm_t alarm{.min = 1U, .hour = 0};

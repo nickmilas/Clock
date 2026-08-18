@@ -11,7 +11,6 @@ extern "C"
     #include "esp_attr.h"
 }
 
-#include "lambda.hpp"
 #include "RtcHwInterface.hpp"
 #include "I2CBusInterface.hpp"
 #include <array>
@@ -42,26 +41,6 @@ public:
     EStatus clearExpiredFlags(bool& isTimerExpired) override;
     /** @copydoc RtcHwInterface::disableAlarm */
     EStatus disableAlarm(clock::EAlarm alarmType) override;
-
-    /** @brief Set the clock to read standard time (active high for standard time - active low for military time) */
-    void setStandardTime(bool isStandardTime) { mIsStandardTime = isStandardTime; }
-    /** @brief Returns the 12/!24 bit status */
-    bool isStandardTime() const { return mIsStandardTime; }
-
-    /** @brief Set whethere we are interpretting time as !AM/PM */
-    void setAfternoon(bool isAfternoon) { mIsAfternoon = isAfternoon; }
-    /** @brief Returns the !AM/PM bit status */
-    bool isAfternoon() const { return mIsAfternoon; }
-
-    /** @brief Set the clock to set the century bit */
-    void setCenturyBit(bool isNewCentury) { mIsCenturyBitOn = isNewCentury; }
-    /** @brief Returns the century bit status */
-    bool isCenturyBitOn() const { return mIsCenturyBitOn; }
-
-    /** @brief Function to notify all listeners */
-    void Notify(lambda<RtcHwEvent> event);
-    /** @brief Function to register for RtcHwEvents */
-    void Register(RtcHwEvent& listener) override { mListeners.push_back(&listener); }
 
     /** @brief I2C address of this device */
     static constexpr uint8_t smDeviceAddr{0x68U};
@@ -112,17 +91,8 @@ private:
     static void taskFunction(void* pArgs);
     static void IRAM_ATTR alarmExpirationHandler(void* pArgs);
 
-    /** @brief Flag indicating how we should interpret the current hour reading (military time by default on DS3231) */
-    bool mIsStandardTime{false};
-    /** @brief Flag indicating whether time is in AM or PM (only matters if we are using standard time - default to morning) */
-    bool mIsAfternoon{false};
-    /** @brief Flag indicating whether or not the century bit is on (default to 21st century) */
-    bool mIsCenturyBitOn{false};
     /** @brief I2C bus interface to perform read and write operations */
     I2CBusInterface& mI2CBus;
-
-    /** @brief List of all components listening for RtcHwEvents */
-    std::vector<RtcHwEvent*> mListeners;
 
     /** @brief Device handle pointer that needs to persist through runtime */
     i2c_master_dev_handle_t mDeviceHandle;
@@ -136,7 +106,7 @@ private:
         .flags = { .disable_ack_check = 0 } // Enable ack check
     };
 
-    static constexpr gpio_num_t smInteruptPin{GPIO_NUM_35}; 
+    static constexpr gpio_num_t smInteruptPin{GPIO_NUM_6}; 
     static constexpr gpio_config_t smInteruptPinConfig = {
         .pin_bit_mask = static_cast<uint64_t>(1ULL << smInteruptPin),
         .mode = GPIO_MODE_INPUT,

@@ -11,7 +11,6 @@ extern "C"
 
 #include <cassert>
 
-#include "lambda.hpp"
 #include "RtcComponent.hpp"
 
 RtcComponent::RtcComponent(RtcHwInterface& rtc) :
@@ -20,6 +19,8 @@ RtcComponent::RtcComponent(RtcHwInterface& rtc) :
     mRtc{rtc}
 {
     assert(xTaskCreate(RtcComponent::taskFunction, "RTC_COMP", 4096U, static_cast<void*>(this), (tskIDLE_PRIORITY + 1), &mHandle) == pdPASS);
+    printf("RTC_COMP: Successfully created RTC_COMP task.\n");
+
     mRtc.Register(*this);
 }
 

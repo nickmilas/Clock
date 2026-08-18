@@ -7,7 +7,7 @@
 
 #include "status.hpp"
 #include "clock_enums.hpp"
-
+#include "Publisher.hpp"
 class RtcHwEvent
 {
 public:
@@ -33,7 +33,7 @@ private:
     RtcHwEvent&& operator=(const RtcHwEvent&&) = delete;    //! Delete move  constructors explicitly
 };
 
-class RtcHwInterface
+class RtcHwInterface : public Publisher<RtcHwEvent>
 {
 public:
     /**
@@ -82,8 +82,6 @@ public:
      * @param alarmType - Enum to decide which to disable
      */
     virtual EStatus disableAlarm(clock::EAlarm alarmType) = 0;
-
-    virtual void Register(RtcHwEvent& listener) = 0;
 
 private:
     RtcHwInterface(const RtcHwInterface&) = delete;                 //! Delete copy-assignment constructors explicitly
