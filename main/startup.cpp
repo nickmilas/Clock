@@ -2,6 +2,7 @@ extern "C"
 {
     #include "freertos/FreeRTOS.h"
     #include "freertos/task.h"
+    #include "esp_lvgl_port.h"
 }
 
 #include "clock_enums.hpp"
