@@ -54,9 +54,8 @@ private:
 
     /** @brief Handle for the current task */
     TaskHandle_t mHandle;
-
     /** @brief Reference to the rtc hardware */
-    RtcHwInterface& mRtc;
+    RtcHwInterface& mRtcHw;
 
     RtcComponent(const RtcComponent&) = delete;                 //! Delete copy-assignment constructors explicitly
     RtcComponent& operator=(const RtcComponent&) = delete;      //! Delete copy constructors explicitly

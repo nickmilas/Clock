@@ -83,12 +83,18 @@ private:
     /** @brief Helper function to display register values */
     void dumpRegisters();
 
+    /** @brief Function responsible for running the rtc task
+     *  -> Marking function as static so it does not belong to a DS3231 object and can match the void (*)(void* arg) signature
+     * 
+     * @param pArgs - Self pass
+     */
+    static void taskFunction(void* pArgs);
+
     /** @brief Helper function to fire off our alarm expired event
      *  -> Marking function as static so it does not belong to a DS3231 object and can match the void (*)(void* arg) signature
      * 
-     * @param pArgs - The object passed in from the task creation / ISR registration
+     * @param pArgs - Self pass
      */
-    static void taskFunction(void* pArgs);
     static void IRAM_ATTR alarmExpirationHandler(void* pArgs);
 
     /** @brief I2C bus interface to perform read and write operations */
@@ -102,11 +108,14 @@ private:
         .dev_addr_length = i2c_addr_bit_len_t::I2C_ADDR_BIT_LEN_7,
         .device_address = smDeviceAddr,
         .scl_speed_hz = 400000U,
-        .scl_wait_us = 0U,                  // Use defualt wait time
+        .scl_wait_us = 0U,                  // Use default wait time
         .flags = { .disable_ack_check = 0 } // Enable ack check
     };
 
-    static constexpr gpio_num_t smInteruptPin{GPIO_NUM_6}; 
+    /** @brief Gpio pinout number from where the interrupt will arrive from (sensor-ad pin) */
+    static constexpr gpio_num_t smInteruptPin{GPIO_NUM_6};
+
+    /** @brief Gpio configuration for receiving the interrupt from the rtc */
     static constexpr gpio_config_t smInteruptPinConfig = {
         .pin_bit_mask = static_cast<uint64_t>(1ULL << smInteruptPin),
         .mode = GPIO_MODE_INPUT,

@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "status.hpp"
-#include "clock_enums.hpp"
+#include "Status.hpp"
+#include "ClockEnums.hpp"
 #include "Publisher.hpp"
 class RtcHwEvent
 {

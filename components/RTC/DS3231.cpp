@@ -3,10 +3,14 @@
  * @brief Implementation of the class representing the DS3231 rtc chip.
 */
 
+extern "C"
+{
+    #include "freertos/FreeRTOS.h"
+    #include "freertos/task.h"
+}
+
 #include "DS3231.hpp"
 #include "I2CBusMaster.hpp"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include <cassert>
 
 DS3231::DS3231(I2CBusInterface& i2cBus) :
@@ -29,7 +33,7 @@ DS3231::DS3231(I2CBusInterface& i2cBus) :
     }
 
     assert(xTaskCreate(DS3231::taskFunction, "RTC", 4096U, static_cast<void*>(this), (tskIDLE_PRIORITY + 1), nullptr) == pdPASS);
-    printf("RTC: Successfully created RTC HW task.\n");
+    printf("RTC: Successfully created RTC HW task.\n\n");
 }
 
 EStatus DS3231::getTime(clock::rtc_time_t& tm)

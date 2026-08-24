@@ -9,34 +9,33 @@ extern "C"
     #include "freertos/task.h"
 }
 
-#include <cassert>
-
 #include "RtcComponent.hpp"
+#include <cassert>
 
 RtcComponent::RtcComponent(RtcHwInterface& rtc) :
     RtcComponentInterface(),
     RtcHwEvent(),
-    mRtc{rtc}
+    mRtcHw{rtc}
 {
     assert(xTaskCreate(RtcComponent::taskFunction, "RTC_COMP", 4096U, static_cast<void*>(this), (tskIDLE_PRIORITY + 1), &mHandle) == pdPASS);
-    printf("RTC_COMP: Successfully created RTC_COMP task.\n");
+    printf("RTC_COMP: Successfully created task.\n\n");
 
-    mRtc.Register(*this);
+    mRtcHw.Register(*this);
 }
 
 EStatus RtcComponent::setTime(const clock::rtc_time_t& tm)
 {
-    return mRtc.setTime(tm);
+    return mRtcHw.setTime(tm);
 }
 
 EStatus RtcComponent::getTime(clock::rtc_time_t& tm)
 {
-    return mRtc.getTime(tm);
+    return mRtcHw.getTime(tm);
 }
 
 EStatus RtcComponent::clearExpiredFlags(bool& isTimerExpired)
 {
-    return mRtc.clearExpiredFlags(isTimerExpired);
+    return mRtcHw.clearExpiredFlags(isTimerExpired);
 }
 
 void RtcComponent::eventAlarmExpired()
@@ -57,7 +56,7 @@ void RtcComponent::taskFunction(void* pArgs)
     static RtcComponent* self{static_cast<RtcComponent*>(pArgs)};
     while (true)
     {
-        vTaskDelay(pdMS_TO_TICKS(1000U)); // 1 second intervals
+//        vTaskDelay(pdMS_TO_TICKS(1000U)); // 1 second intervals
         /* Wait until we get our interrupt from the rtc before checking for which alarm expired */
         if (ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(portMAX_DELAY)))
         {
@@ -71,7 +70,7 @@ void RtcComponent::taskFunction(void* pArgs)
                 if (isTimerExpired)
                 {
                     printf("RTC_COMP: Timer expired & disabled!\n");
-                    self->mRtc.disableAlarm(clock::EAlarm::Timer);
+                    self->mRtcHw.disableAlarm(clock::EAlarm::Timer);
                 }
                 else
                 {

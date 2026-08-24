@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "clock_enums.hpp"
-#include "status.hpp"
+#include "ClockEnums.hpp"
+#include "Status.hpp"
 
 class RtcComponentInterface
 {
