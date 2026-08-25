@@ -56,7 +56,7 @@ void RtcComponent::taskFunction(void* pArgs)
     static RtcComponent* self{static_cast<RtcComponent*>(pArgs)};
     while (true)
     {
-//        vTaskDelay(pdMS_TO_TICKS(1000U)); // 1 second intervals
+        vTaskDelay(pdMS_TO_TICKS(1000U)); // 1 second intervals
         /* Wait until we get our interrupt from the rtc before checking for which alarm expired */
         if (ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(portMAX_DELAY)))
         {

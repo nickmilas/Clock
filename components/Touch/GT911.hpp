@@ -70,7 +70,7 @@ private:
     /** @brief Gpio configuration for receiving the interrupt from the touch controller */
     static constexpr gpio_config_t smInteruptPinConfig = {
         .pin_bit_mask = static_cast<uint64_t>(1ULL << smInteruptPin),
-        .mode = GPIO_MODE_INPUT,
+        .mode = GPIO_MODE_OUTPUT,
         .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_POSEDGE

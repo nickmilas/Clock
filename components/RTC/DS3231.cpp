@@ -21,19 +21,19 @@ DS3231::DS3231(I2CBusInterface& i2cBus) :
     err |= gpio_install_isr_service(0);
     err |= gpio_isr_handler_add(smInteruptPin, alarmExpirationHandler, static_cast<void*>(this));
     assert(err == ESP_OK);
-    printf("RTC: Successfully configured gpio %d for rtc interupt handling\n", static_cast<uint8_t>(smInteruptPin));
+    printf("DS3231: Successfully configured gpio %d for rtc interupt handling\n", static_cast<uint8_t>(smInteruptPin));
 
     assert(mI2CBus.addDevice(&mDeviceConfig, mDeviceHandle) == EStatus::Success);
-    printf("RTC: Successfully added device with address: 0x%x\n", smDeviceAddr);
+    printf("DS3231: Successfully added device with address: 0x%x\n", smDeviceAddr);
 
     bool isTimer;
     if (clearExpiredFlags(isTimer) != EStatus::Success)
     {
-        printf("RTC: Failed to clear expired flags on startup!!!\n");
+        printf("DS3231: Failed to clear expired flags on startup!!!\n");
     }
 
-    assert(xTaskCreate(DS3231::taskFunction, "RTC", 4096U, static_cast<void*>(this), (tskIDLE_PRIORITY + 1), nullptr) == pdPASS);
-    printf("RTC: Successfully created RTC HW task.\n\n");
+    assert(xTaskCreate(DS3231::taskFunction, "DS3231", 4096U, static_cast<void*>(this), (tskIDLE_PRIORITY + 1), nullptr) == pdPASS);
+    printf("DS3231: Successfully created DS3231 HW task.\n\n");
 }
 
 EStatus DS3231::getTime(clock::rtc_time_t& tm)
@@ -67,7 +67,7 @@ EStatus DS3231::setTime(const clock::rtc_time_t& tm)
 
     if (tm.sec > 59U || tm.min > 59U || tm.hour > 23U || tm.day > 7U || tm.date > 31U || tm.month > 12U || tm.year > 99U)
     {
-        printf("RTC: Invalid time provided to setTime!\n");
+        printf("DS3231: Invalid time provided to setTime!\n");
         return EStatus::Range;
     }
 
@@ -91,7 +91,7 @@ EStatus DS3231::setAlarm(const clock::rtc_alarm_t& tm, clock::EAlarm alarm)
 
     if (tm.min > 59U || tm.hour > 23U)
     {
-        printf("RTC: Invalid time provided to setAlarm!\n");
+        printf("DS3231: Invalid time provided to setAlarm!\n");
         return EStatus::Range;
     }
 
@@ -108,7 +108,7 @@ EStatus DS3231::setAlarm(const clock::rtc_alarm_t& tm, clock::EAlarm alarm)
         clock::rtc_time_t currTime;
         if (getTime(currTime) != EStatus::Success)
         {
-            printf("RTC: Failed to get current time for timer!\n");
+            printf("DS3231: Failed to get current time for timer!\n");
             return EStatus::Error;
         }
 
@@ -162,7 +162,7 @@ uint8_t DS3231::BCDToDecimal(const uint8_t val) const
     uint8_t lowerBits{static_cast<uint8_t>(val & 0xF)};
     uint8_t upperBits{static_cast<uint8_t>((val >> 4U) & 0xF)};
 
-    /* Cap our values to be at most 9. The RTC should never return values greater than that, but to be cautious. */
+    /* Cap our values to be at most 9. The DS3231 should never return values greater than that, but to be cautious. */
     if (lowerBits > 9U)
     {
         lowerBits = 9U;
@@ -184,7 +184,7 @@ EStatus DS3231::enableAlarm(clock::EAlarm alarm)
     EStatus status{mI2CBus.write_read(smDeviceAddr, &address, sizeof(uint8_t), &controlRegister, sizeof(uint8_t))};
     if (status != EStatus::Success)
     {
-        printf("RTC: Failed to set an alarm: %d\n", static_cast<uint8_t>(alarm));
+        printf("DS3231: Failed to set an alarm: %d\n", static_cast<uint8_t>(alarm));
         return status;
     }
 
@@ -202,7 +202,7 @@ EStatus DS3231::clearExpiredFlags(bool& isTimerExpired)
     EStatus status{mI2CBus.write_read(smDeviceAddr, &address, sizeof(uint8_t), &statusRegister, sizeof(uint8_t))};
     if (status != EStatus::Success)
     {
-        printf("RTC: Failed to clear expired alarm flags\n");
+        printf("DS3231: Failed to clear expired alarm flags\n");
         return status;
     }
 
@@ -228,7 +228,7 @@ EStatus DS3231::disableAlarm(clock::EAlarm alarmType)
     EStatus status{mI2CBus.write_read(smDeviceAddr, &address, sizeof(uint8_t), &controlRegister, sizeof(uint8_t))};
     if (status != EStatus::Success)
     {
-        printf("RTC: Failed to disable a given alarm");
+        printf("DS3231: Failed to disable a given alarm");
     }
 
     controlRegister &= (alarmType == clock::EAlarm::Timer) ? ~(0b00000001) : ~(0b00000010);
@@ -240,7 +240,7 @@ void DS3231::taskFunction(void* pArgs)
 {
     if (pArgs == nullptr)
     {
-        printf("RTC: Task args invalid...\n");
+        printf("DS3231: Task args invalid...\n");
         return;
     }
 
@@ -252,7 +252,7 @@ void DS3231::taskFunction(void* pArgs)
         EStatus getStatus{self->getTime(readTime)};
         if (getStatus == EStatus::Success)
         {
-            printf("RTC: Time read is %d/%d/%d - %d:%d:%d%s\n", readTime.month,
+            printf("DS3231: Time read is %d/%d/%d - %d:%d:%d%s\n", readTime.month,
                                                         readTime.date,
                                                         readTime.year,
                                                         readTime.hour,
@@ -262,7 +262,7 @@ void DS3231::taskFunction(void* pArgs)
         }
         else
         {
-            printf("RTC: Failed to get time!\n");
+            printf("DS3231: Failed to get time!\n");
         }
     }
 }

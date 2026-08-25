@@ -35,13 +35,13 @@ void TouchComponent::taskFunction(void* pArgs)
     static TouchComponent* self{static_cast<TouchComponent*>(pArgs)};
     while (true)
     {
-        //vTaskDelay(pdMS_TO_TICKS(1000U)); // 1 second intervals
+        vTaskDelay(pdMS_TO_TICKS(1000U)); // 1 second intervals
         /* Wait until we get our interrupt from the rtc before checking for which alarm expired */
         if (ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(portMAX_DELAY)))
         {
             if (self->mTouchHw.readTouch(self->mCurrX, self->mCurrY) == EStatus::Success)
             {
-                printf("TCH_COMP: Touch coordinates are: (X, Y)\n");
+                //printf("TCH_COMP: Touch coordinates are: (X, Y)\n");
             }
         }
     }

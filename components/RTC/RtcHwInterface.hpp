@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 - Nicholas Milas Clk project
- * @brief Interface for a RTC component.
+ * @brief Interface for a RTC hardware.
 */
 
 #pragma once

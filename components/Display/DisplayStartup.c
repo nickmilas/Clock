@@ -13,5 +13,5 @@ void startupLVGL(void)
     // lvgl_port_init() launches lvgl itself, creates an internal task, and creates a
     // mutex to be used whenever interfacing with LVGL functions as they are not thread-safe
     assert(lvgl_port_init(&cfg) == ESP_OK); // Assert = no error
-    printf("Successfully booted LVGL!\n");
+    //printf("Successfully booted LVGL!\n");
 }

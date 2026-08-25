@@ -3,12 +3,6 @@
  * @brief Definition for the GT911 driver.
 */
 
-extern "C"
-{
-    #include "freertos/FreeRTOS.h"
-    #include "freertos/task.h"
-}
-
 #include "GT911.hpp"
 #include "I2CBusMaster.hpp"
 
@@ -20,12 +14,13 @@ GT911::GT911(I2CBusInterface& i2cBus) :
     printf("GT911: Successfully started up device!\n");
 
     esp_err_t err{gpio_config(&smInteruptPinConfig)};
-    err |= gpio_isr_handler_add(smInteruptPin, touchInterruptHandler, static_cast<void*>(this));
+    // TODO - Re-enable this once CH422 is working properly
+    //err |= gpio_isr_handler_add(smInteruptPin, touchInterruptHandler, static_cast<void*>(this));
     assert(err == ESP_OK);
-    printf("GT911: Successfully configured gpio %d for rtc interupt handling\n", static_cast<uint8_t>(smInteruptPin));
+    printf("GT911: Successfully configured gpio %d for interupt handling\n", static_cast<uint8_t>(smInteruptPin));
 
     assert(mI2CBus.addDevice(&mDeviceConfig, mDeviceHandle) == EStatus::Success);
-    printf("GT911: Successfully added device with address: 0x%x\n", smDeviceAddr);
+    printf("GT911: Successfully added device with address: 0x%x\n\n", smDeviceAddr);
 }
 
 EStatus GT911::startupDevice()

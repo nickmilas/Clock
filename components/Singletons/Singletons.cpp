@@ -11,6 +11,12 @@ I2CBusInterface& Singletons::getI2CBus()
     return i2c;
 }
 
+ExioInterface& Singletons::getExioHw()
+{
+    static CH422 exio{getI2CBus()};
+    return exio;
+}
+
 RtcHwInterface& Singletons::getRtcHw()
 {
     static DS3231 rtcHw{getI2CBus()};
@@ -39,6 +45,7 @@ Singletons::Singletons()
 {
     // INITIALIZATION ORDER MATTERS HERE!
     std::ignore = getI2CBus();
+    std::ignore = getExioHw();
     std::ignore = getRtcHw();
     std::ignore = getRtcComp();
     std::ignore = getTouchHw();

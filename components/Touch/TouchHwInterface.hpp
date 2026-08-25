@@ -1,6 +1,6 @@
 /*
  * Copyright 2026 - Nicholas Milas Clk project
- * @brief Declaration for the TouchHwInterface driver.
+ * @brief Interface for touch hw.
 */
 
 #pragma once

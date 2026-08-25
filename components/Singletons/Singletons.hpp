@@ -7,6 +7,8 @@
 
 #include "I2CBusMaster.hpp"
 
+#include "CH422.hpp"
+
 #include "DS3231.hpp"
 #include "RtcComponent.hpp"
 
@@ -30,7 +32,10 @@ public:
     /** @brief Fetch I2C bus */
     static I2CBusInterface& getI2CBus();
 
-    /** @brief Fetch RtcHW */
+    /** @brief Fetch ExioHw */
+    static ExioInterface& getExioHw();
+
+    /** @brief Fetch RtcHw */
     static RtcHwInterface& getRtcHw();
     /** @brief Fetch RtcComponent */
     static RtcComponentInterface& getRtcComp();
